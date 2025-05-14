@@ -3,35 +3,52 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
+use App\Models\Type;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Models\DeviceUptime;
 
 class LocationController extends Controller
 {
     public function index()
     {
         $locations = Cache::remember('locations', 60, function () {
-            return Location::all()->map(function ($location) {
+            return Location::with('type')->get()->map(function ($location) {
                 $location->status = $this->checkDeviceStatus($location->ip_address);
                 return $location;
             });
         });
 
-        return view('locations.index', compact('locations'));
+        $onlineLocations = $locations->filter(fn($l) => $l->status === 'online');
+        $offlineLocations = $locations->filter(fn($l) => $l->status === 'offline');
+
+        return view('locations.index', compact('onlineLocations', 'offlineLocations'));
+    }
+
+    public function tablePartial()
+    {
+        $locations = Location::with('type')->get()->map(function ($location) {
+            $location->status = $this->checkDeviceStatus($location->ip_address);
+            return $location;
+        });
+
+        $onlineLocations = $locations->filter(fn($l) => $l->status === 'online');
+        $offlineLocations = $locations->filter(fn($l) => $l->status === 'offline');
+
+        return view('locations.partials.table-wrapper', compact('onlineLocations', 'offlineLocations'));
     }
 
     public function create()
     {
-        return view('locations.create');
+        $types = Type::all();
+        return view('locations.create', compact('types'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'device_type' => 'required',
+            'type_id' => 'required|exists:types,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'ip_address' => 'nullable|ip',
@@ -39,19 +56,21 @@ class LocationController extends Controller
 
         Location::create($request->all());
         Cache::forget('locations');
+
         return redirect()->route('locations.index')->with('success', 'Lokasi berhasil ditambahkan');
     }
 
     public function edit(Location $location)
     {
-        return view('locations.edit', compact('location'));
+        $types = Type::all();
+        return view('locations.edit', compact('location', 'types'));
     }
 
     public function update(Request $request, Location $location)
     {
         $request->validate([
             'name' => 'required',
-            'device_type' => 'required',
+            'type_id' => 'required|exists:types,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'ip_address' => 'nullable|ip',
@@ -59,6 +78,7 @@ class LocationController extends Controller
 
         $location->update($request->all());
         Cache::forget('locations');
+
         return redirect()->route('locations.index');
     }
 
@@ -66,22 +86,21 @@ class LocationController extends Controller
     {
         $location->delete();
         Cache::forget('locations');
+
         return redirect()->route('locations.index');
     }
 
     public function map()
     {
-        // Ambil semua lokasi dan cache selama 60 menit
         $locations = Cache::remember('locations', 60, function () {
-            return Location::all()->map(function ($location) {
+            return Location::with('type')->get()->map(function ($location) {
                 $location->status = $this->checkDeviceStatus($location->ip_address);
                 return $location;
             });
         });
 
-        // Ambil data pertama dari tabel 'sites' sebagai pusat peta
         $site = Cache::remember('site_center', 60, function () {
-            return Site::first(); // Bisa diganti dengan kondisi tertentu
+            return Site::first();
         });
 
         return view('map', compact('locations', 'site'));

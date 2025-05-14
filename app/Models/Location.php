@@ -23,4 +23,8 @@ class Location extends Model
     {
         return $this->hasMany(DeviceUptime::class, 'location_id');
     }
+    public function type()
+    {
+        return $this->belongsTo(Type::class);
+    }
 }

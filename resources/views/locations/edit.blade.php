@@ -15,9 +15,14 @@
         </div>
 
         <div class="mb-3">
-            <label for="device_type" class="form-label">Tipe Perangkat</label>
-            <input type="text" id="device_type" name="device_type" class="form-control"
-                value="{{ $location->device_type ?? '' }}" required>
+            <label>Jenis Perangkat</label>
+            <select name="type_id" class="form-control" required>
+                @foreach ($types as $type)
+                    <option value="{{ $type->id }}" {{ $location->type_id == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         <div class="mb-3">

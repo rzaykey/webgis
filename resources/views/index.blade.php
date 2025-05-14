@@ -45,7 +45,7 @@
             @endforeach
         </div>
 
-        <!-- Chart Card -->
+        {{-- <!-- Chart Card -->
         <div class="mb-4 shadow-sm card">
             <div class="card-body">
                 <h5 class="card-title">Waktu Online & Offline (Bulan Ini)</h5>
@@ -55,7 +55,7 @@
                     <canvas id="uptimeChart"></canvas>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <div class="mb-4 shadow-sm card">
             <div class="card-body">

@@ -45,6 +45,9 @@
                             <a href="{{ route('sites.index') }}" class="text-black nav-link">Data Site</a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('types.index') }}" class="text-black nav-link">Data Jenis Perangkat</a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('users.index') }}" class="text-black nav-link">Data Pengguna</a>
                         </li>
                     </ul>

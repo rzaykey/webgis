@@ -89,33 +89,14 @@ class LocationController extends Controller
 
     private function checkDeviceStatus($ip)
     {
-        if (!$ip) return 'Unknown';
+        if (!$ip) return 'unknown';
 
         $pingCommand = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
             ? "ping -n 1 $ip"
             : "ping -c 1 $ip";
 
-        $output = shell_exec($pingCommand);
+        exec($pingCommand, $output, $resultCode);
 
-        return (strpos($output, 'TTL') !== false) ? 'Online' : 'Offline';
-    }
-
-    private function checkUptime($ip, $locationId)
-    {
-        $pingCommand = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
-            ? "ping -n 1 $ip"
-            : "ping -c 1 $ip";
-
-        $output = shell_exec($pingCommand);
-        $isOnline = strpos($output, 'TTL') !== false;
-
-        // Simpan hasil ping di database
-        DeviceUptime::create([
-            'location_id' => $locationId,
-            'status' => $isOnline,
-            'checked_at' => now(),
-        ]);
-
-        return $isOnline ? 'Online' : 'Offline';
+        return ($resultCode === 0) ? 'online' : 'offline';
     }
 }

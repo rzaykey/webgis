@@ -29,12 +29,15 @@
                         <td>{{ $location->longitude }}</td>
                         <td>{{ $location->ip_address ?? 'N/A' }}</td>
                         <td>
-                            @if ($location->status == 'online')
+                            @if ($location->status === 'online')
                                 <span class="badge bg-success">Online</span>
-                            @else
+                            @elseif ($location->status === 'offline')
                                 <span class="badge bg-danger">Offline</span>
+                            @else
+                                <span class="badge bg-secondary">Unknown</span>
                             @endif
                         </td>
+
                         <td>
                             <a href="{{ route('locations.edit', $location) }}" class="btn btn-sm btn-info">Edit</a>
 

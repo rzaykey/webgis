@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="mt-4 container-fluid">
+    <div class="container">
         <!-- Header -->
-        <h2 class="text-center fw-bold">Dashboard Monitoring Perangkat</h2>
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold">Dashboard Monitoring Perangkat</h2>
+        </div>
 
         <!-- Statistik Perangkat -->
-        <div class="row g-3">
+        <div class="mb-4 row g-3">
             @php
                 $stats = [
                     [
@@ -31,9 +33,8 @@
             @endphp
 
             @foreach ($stats as $stat)
-                <!-- Setiap card akan memenuhi lebar penuh di semua perangkat -->
-                <div class="col-12">
-                    <div class="card text-white shadow-sm {{ $stat['bg'] }}">
+                <div class="col-md-4">
+                    <div class="card text-white {{ $stat['bg'] }} shadow-sm">
                         <div class="text-center card-body">
                             <h5 class="card-title">{{ $stat['title'] }}</h5>
                             <h2 class="display-5">{{ $stat['count'] }}</h2>
@@ -44,53 +45,39 @@
             @endforeach
         </div>
 
-        <!-- Waktu Online dan Diagram Status -->
-        <div class="mt-4 row g-3">
-            <!-- Waktu Online -->
-            <div class="col-12">
-                <div class="shadow-sm card">
-                    <div class="card-body">
-                        <h5 class="card-title">Waktu Online & Offline (Bulan Ini)</h5>
-                        <p>Total waktu online: <strong>{{ $uptimeFormatted }}</strong></p>
-                        <p>Total waktu offline: <strong>{{ $downtimeFormatted }}</strong></p>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="uptimeChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Diagram Persentase -->
-            <div class="col-12">
-                <div class="shadow-sm card">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Perangkat Online vs Offline</h5>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="deviceStatusChart"></canvas>
-                        </div>
-                    </div>
+        <!-- Chart Card -->
+        <div class="mb-4 shadow-sm card">
+            <div class="card-body">
+                <h5 class="card-title">Waktu Online & Offline (Bulan Ini)</h5>
+                <p>Total waktu online: <strong>{{ $uptimeFormatted }}</strong></p>
+                <p>Total waktu offline: <strong>{{ $downtimeFormatted }}</strong></p>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="uptimeChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Statistik Perangkat Berdasarkan Jenis -->
-        <div class="mt-4 row g-3">
-            <div class="col-12">
-                <div class="shadow-sm card">
-                    <div class="card-body">
-                        <h5 class="card-title">Perangkat Berdasarkan Jenis dan Status</h5>
-                        <div class="chart-container" style="height: 400px;">
-                            <canvas id="deviceTypeChart"></canvas>
-                        </div>
-                    </div>
+        <div class="mb-4 shadow-sm card">
+            <div class="card-body">
+                <h5 class="card-title">Total Perangkat Online vs Offline</h5>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="deviceStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4 shadow-sm card">
+            <div class="card-body">
+                <h5 class="card-title">Perangkat Berdasarkan Jenis dan Status</h5>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="deviceTypeChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tambahkan Chart.js -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const onlineDevices = {{ $onlineDevices ?? 0 }};
@@ -99,7 +86,6 @@
             const downtimeMinutes = {{ $downtimeInMinutes ?? 0 }};
             const deviceTypes = @json($deviceTypes);
 
-            // Fungsi Inisialisasi Chart
             function renderChart(id, type, data) {
                 new Chart(document.getElementById(id), {
                     type: type,
@@ -124,7 +110,7 @@
                 });
             }
 
-            // 1. Chart Uptime dan Downtime (Bar Chart)
+            // Uptime & Downtime Chart
             renderChart('uptimeChart', 'bar', {
                 labels: ['Online (Menit)', 'Offline (Menit)'],
                 datasets: [{
@@ -135,7 +121,7 @@
                 }]
             });
 
-            // 2. Chart Status Perangkat (Doughnut Chart)
+            // Device Status Chart
             renderChart('deviceStatusChart', 'doughnut', {
                 labels: ['Online', 'Offline'],
                 datasets: [{
@@ -144,7 +130,7 @@
                 }]
             });
 
-            // 3. Chart Perangkat Berdasarkan Jenis (Bar Chart)
+            // Device by Type Chart
             const deviceLabels = Object.keys(deviceTypes);
             const deviceDataOnline = deviceLabels.map(type => deviceTypes[type].online ?? 0);
             const deviceDataOffline = deviceLabels.map(type => deviceTypes[type].offline ?? 0);

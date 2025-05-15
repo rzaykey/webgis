@@ -12,7 +12,7 @@ class Location extends Model
 
     protected $fillable = [
         'name',
-        'device_type',
+        'type_id',
         'ip_address',
         'latitude',
         'longitude',

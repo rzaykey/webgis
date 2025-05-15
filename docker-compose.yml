@@ -11,6 +11,7 @@ services:
         working_dir: /var/www/html
         volumes:
             - ./:/var/www/html
+            - ./.env:/var/www/html/.env
         networks:
             - webgis-network
         ports:

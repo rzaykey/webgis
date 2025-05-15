@@ -114,8 +114,8 @@ class LocationController extends Controller
             ? "ping -n 1 $ip"
             : "ping -c 1 $ip";
 
-        exec($pingCommand, $output, $resultCode);
+            exec($pingCommand, $output, $resultCode);
 
-        return ($resultCode === 0) ? 'online' : 'offline';
+            return ($resultCode === 0) ? 'online' : 'offline';
     }
 }

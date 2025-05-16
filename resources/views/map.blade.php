@@ -3,17 +3,18 @@
 @section('content')
     <h2 class="mb-4 text-center">Tampilan Peta Lokasi CCTV dan Access Point</h2>
 
-    <!-- Input Pencarian -->
-    <div class="mb-3 d-flex justify-content-center">
+    <!-- Input Pencarian dan tombol Lokasi Saya -->
+    <div class="mb-3 d-flex justify-content-center align-items-center" style="gap: 10px;">
         <label for="search" class="visually-hidden">Cari Lokasi</label>
         <input type="text" id="search" placeholder="Cari Kota (tekan Enter)" class="form-control w-100 w-md-50"
             style="max-width: 400px; border-radius: 8px;">
+        <button id="btnUseMyLocation" type="button" class="btn btn-info">Gunakan Lokasi Saya</button>
     </div>
 
     <!-- Kontainer Peta -->
-    <div id="map" style="width: 100%; height: 70vh; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>
+    <div id="map" style="width: 100%; height: 70vh; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    </div>
 
-    <!-- CSS untuk Custom Marker -->
     <style>
         .custom-marker {
             display: flex;
@@ -22,7 +23,6 @@
         }
     </style>
 
-    <!-- Leaflet JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var locations = {!! json_encode($locations ?? []) !!};
@@ -43,7 +43,6 @@
             locations.forEach(function(loc) {
                 if (!loc.latitude || !loc.longitude) return;
 
-                // Warna berdasarkan status
                 let iconColor = (loc.status || '').toLowerCase() === 'online' ? 'green' : 'red';
 
                 let customIcon = L.divIcon({
@@ -107,7 +106,6 @@
                     });
             }
 
-            // Fungsi untuk escape HTML
             function escapeHtml(text) {
                 return String(text).replace(/[&<>"']/g, function(m) {
                     return ({
@@ -119,6 +117,52 @@
                     })[m];
                 });
             }
+
+            // Tombol "Gunakan Lokasi Saya" dengan akurasi maksimal
+            document.getElementById('btnUseMyLocation').addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            var lat = position.coords.latitude;
+                            var lng = position.coords.longitude;
+                            var accuracy = position.coords.accuracy; // meter
+
+                            // Tampilkan posisi dengan zoom lebih besar
+                            map.setView([lat, lng], 18);
+
+                            // Tambah marker dengan popup akurasi
+                            var userMarker = L.marker([lat, lng]).addTo(map);
+                            userMarker.bindPopup(`Lokasi Anda (akurasi ±${accuracy.toFixed(1)} m)`)
+                                .openPopup();
+
+                        },
+                        function(error) {
+                            switch (error.code) {
+                                case error.PERMISSION_DENIED:
+                                    alert("Izin akses lokasi ditolak oleh pengguna.");
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    alert("Informasi lokasi tidak tersedia.");
+                                    break;
+                                case error.TIMEOUT:
+                                    alert("Permintaan lokasi timed out.");
+                                    break;
+                                case error.UNKNOWN_ERROR:
+                                default:
+                                    alert("Terjadi kesalahan saat mengambil lokasi.");
+                                    break;
+                            }
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 15000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    alert('Geolocation tidak didukung oleh browser Anda.');
+                }
+            });
+
         });
     </script>
 @endsection

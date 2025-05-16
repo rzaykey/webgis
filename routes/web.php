@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/locations/partials/table', [LocationController::class, 'tablePartial'])->name('locations.partials.table');
     Route::resource('types', TypeController::class);
+    Route::post('/locations/import', [LocationController::class, 'import'])->name('locations.import');
 });
 
 // Admin Dashboard

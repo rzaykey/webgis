@@ -33,6 +33,10 @@
                 value="{{ old('ip_address', $location->ip_address ?? '') }}">
         </div>
 
+        <button type="button" id="btn-use-current-location" class="mb-3 btn btn-outline-primary">
+            Gunakan Lokasi Saya
+        </button>
+
         <div id="map" style="height: 400px;" class="mb-3"></div>
 
         <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $location->latitude ?? '') }}">
@@ -50,32 +54,73 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var centerLat = {{ $location->latitude ?? ($site->latitude ?? -6.2) }};
-            var centerLng = {{ $location->longitude ?? ($site->longitude ?? 106.816666) }};
+            let defaultLat = {{ $location->latitude ?? 'null' }};
+            let defaultLng = {{ $location->longitude ?? 'null' }};
 
-            var map = L.map('map').setView([centerLat, centerLng], 13);
+            let map, marker;
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            function initMap(lat, lng) {
+                map = L.map('map').setView([lat, lng], 17);
 
-            var marker = L.marker([centerLat, centerLng], {
-                draggable: true
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
 
-            marker.on('dragend', function(e) {
-                var position = marker.getLatLng();
-                document.getElementById('latitude').value = position.lat;
-                document.getElementById('longitude').value = position.lng;
-            });
+                marker = L.marker([lat, lng], {
+                    draggable: true
+                }).addTo(map);
 
-            map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                document.getElementById('latitude').value = e.latlng.lat;
-                document.getElementById('longitude').value = e.latlng.lng;
-            });
+                marker.on('dragend', function(e) {
+                    const pos = marker.getLatLng();
+                    updateFormCoords(pos.lat, pos.lng);
+                });
 
-            // Kalau mau, bisa juga tambahkan fitur pencarian seperti di create
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                    updateFormCoords(e.latlng.lat, e.latlng.lng);
+                });
+            }
+
+            function updateFormCoords(lat, lng) {
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+            }
+
+            function moveToCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        let lat = position.coords.latitude;
+                        let lng = position.coords.longitude;
+                        if (!map) {
+                            initMap(lat, lng);
+                        } else {
+                            map.setView([lat, lng], 17);
+                            marker.setLatLng([lat, lng]);
+                        }
+                        updateFormCoords(lat, lng);
+                    }, function() {
+                        alert("Gagal mengambil lokasi Anda.");
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                } else {
+                    alert("Browser Anda tidak mendukung geolocation.");
+                }
+            }
+
+
+            // Inisialisasi awal
+            if (defaultLat !== null && defaultLng !== null) {
+                initMap(defaultLat, defaultLng);
+                updateFormCoords(defaultLat, defaultLng);
+            } else {
+                moveToCurrentLocation(); // default to current location if no location available
+            }
+
+            // Event handler tombol
+            document.getElementById('btn-use-current-location').addEventListener('click', moveToCurrentLocation);
         });
     </script>
 @endsection

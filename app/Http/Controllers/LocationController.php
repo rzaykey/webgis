@@ -7,6 +7,8 @@ use App\Models\Type;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\LocationsImport;
 
 class LocationController extends Controller
 {
@@ -41,7 +43,8 @@ class LocationController extends Controller
     public function create()
     {
         $types = Type::all();
-        return view('locations.create', compact('types'));
+        $defaultLocation = Location::first();  // Ambil lokasi pusat/site default
+        return view('locations.create', compact('types', 'defaultLocation'));
     }
 
     public function store(Request $request)
@@ -114,8 +117,22 @@ class LocationController extends Controller
             ? "ping -n 1 $ip"
             : "ping -c 1 $ip";
 
-            exec($pingCommand, $output, $resultCode);
+        exec($pingCommand, $output, $resultCode);
 
-            return ($resultCode === 0) ? 'online' : 'offline';
+        return ($resultCode === 0) ? 'online' : 'offline';
+    }
+
+    public function import(Request $request)
+    {
+        // dd('import dipanggil');
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new LocationsImport, $request->file('file'));
+
+        Cache::forget('locations');
+
+        return redirect()->route('locations.index')->with('success', 'Data lokasi berhasil diimpor.');
     }
 }

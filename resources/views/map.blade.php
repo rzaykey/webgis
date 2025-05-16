@@ -67,7 +67,7 @@
                     .addTo(map)
                     .bindPopup(`
                         <strong>${escapeHtml(loc.name ?? 'Tidak Ada Nama')}</strong><br>
-                        Tipe: ${escapeHtml(loc.device_type ?? 'Tidak Diketahui')}<br>
+                        Tipe: ${escapeHtml(loc.type.name ?? 'Tidak Diketahui')}<br>
                         Status: ${escapeHtml(loc.status ?? 'Tidak Ada Status')}<br>
                         IP: ${escapeHtml(loc.ip_address ?? 'N/A')}
                     `);

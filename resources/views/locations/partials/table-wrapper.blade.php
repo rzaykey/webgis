@@ -24,14 +24,19 @@
                             <td>{{ $location->longitude }}</td>
                             <td>{{ $location->ip_address ?? 'N/A' }}</td>
                             <td><span class="badge bg-danger">Offline</span></td>
-                            <td>
-                                <a href="{{ route('locations.edit', $location) }}" class="btn btn-sm btn-info">Edit</a>
-                                <form action="{{ route('locations.destroy', $location) }}" method="POST"
-                                    style="display:inline;">
+                            <td class="text-center">
+                                <a href="{{ route('locations.edit', $location->id) }}"
+                                    class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <form action="{{ route('locations.destroy', $location->id) }}" method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Yakin ingin menghapus?');">Hapus</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>
@@ -66,14 +71,19 @@
                             <td>{{ $location->longitude }}</td>
                             <td>{{ $location->ip_address ?? 'N/A' }}</td>
                             <td><span class="badge bg-success">Online</span></td>
-                            <td>
-                                <a href="{{ route('locations.edit', $location) }}" class="btn btn-sm btn-info">Edit</a>
-                                <form action="{{ route('locations.destroy', $location) }}" method="POST"
-                                    style="display:inline;">
+                            <td class="text-center">
+                                <a href="{{ route('locations.edit', $location->id) }}"
+                                    class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <form action="{{ route('locations.destroy', $location->id) }}" method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Yakin ingin menghapus?');">Hapus</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>
